@@ -38,6 +38,12 @@ const notValidProduct = {
 
 const notExistingId = "123456123456123456123456";
 
+const getExistingId = async () => {
+  const response = await client.post("/products").send(validProduct);
+  const existingId = response.body._id;
+  return existingId;
+};
+
 beforeAll(async () => {
   await mongoose.connect(process.env.MONGO_URL_TEST);
   const product = new ProductsModel({
@@ -81,16 +87,27 @@ describe("Test APIs", () => {
   });
 
   // When retrieving the /products/:id endpoint:
-  // expect requests to be 404 with a non-existing id, like 123456123456123456123456. Use a 24 character ID or casting to ObjectID will fail
-  // expect requests to return the correct product with a valid id
+  //  - expect requests to be 404 with a non-existing id, like 123456123456123456123456. Use a 24 character ID or casting to ObjectID will fail
+  //  - expect requests to return the correct product with a valid id
 
   it("Should test that GET /products/:productId with a not valid product returns a 404", async () => {
     await client.get(`/products/${notExistingId}`).expect(404);
   });
 
   it("Should test that GET /products/:productId with a valid id", async () => {
-    const response = await client.post("/products").send(validProduct);
-    const existingId = response.body._id;
+    const existingId = await getExistingId();
     await client.get(`/products/${existingId}`).expect(200);
+  });
+
+  // When deleting the /products/:id endpoint:
+  // - expect successful 204 response code
+  // - expect 404 with a non-existing id
+  it("Should test that DELETE /products/:productId with a valid id returns a 204", async () => {
+    const existingId = await getExistingId();
+    await client.delete(`/products/${existingId}`).expect(204);
+  });
+
+  it("Should test that DELETE /products/:productId with a not valid product id returns a 404", async () => {
+    await client.delete(`/products/${notExistingId}`).expect(404);
   });
 });
