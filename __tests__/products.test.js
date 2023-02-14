@@ -36,6 +36,14 @@ const notValidProduct = {
   price: 100,
 };
 
+const validResForUpdate = {
+  name: "jskdfgkldfşgkd",
+  price: 300,
+};
+const notValidResForUpdate = {
+  name: "A valid product",
+};
+
 const notExistingId = "123456123456123456123456";
 
 const getExistingId = async () => {
@@ -110,4 +118,26 @@ describe("Test APIs", () => {
   it("Should test that DELETE /products/:productId with a not valid product id returns a 404", async () => {
     await client.delete(`/products/${notExistingId}`).expect(404);
   });
+
+  // When updating a /product/:id endpoint with new data:
+  //  - Expect requests to be accepted.
+  //  - Expect 404 with a non-existing id
+  //  - Expect the response.body.name to be changed
+  //  - Expect the typeof name in response.body to be “string”
+
+  it("Should test that PUT /products/:productId with a valid id returns a 200", async () => {
+    const responseBefore = await client.post("/products").send(validProduct);
+    const existingId = responseBefore.body._id;
+
+    const responseAfter = await client
+      .put(`/products/${existingId}`)
+      .send(validResForUpdate)
+      .expect(200);
+  });
+
+  it("should test that PUT /products/:productId with a non-existing id returns 404", async () => {
+    await client.put(`/producsts/${notExistingId}`).expect(404);
+  });
+
+  // it("should test that PUT /products/:productId with a response with same name value returns error")
 });
