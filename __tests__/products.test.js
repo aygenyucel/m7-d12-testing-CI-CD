@@ -37,12 +37,12 @@ const notValidProduct = {
 };
 
 const validResForUpdate = {
-  name: "jskdfgkldfşgkd",
+  name: 22,
   price: 300,
 };
-const notValidResForUpdate = {
-  name: "A valid product",
-};
+// const notValidResForUpdate = {
+//   name: "xxxxxxxxx",
+// };
 
 const notExistingId = "123456123456123456123456";
 
@@ -126,18 +126,18 @@ describe("Test APIs", () => {
   //  - Expect the typeof name in response.body to be “string”
 
   it("Should test that PUT /products/:productId with a valid id returns a 200", async () => {
-    const responseBefore = await client.post("/products").send(validProduct);
-    const existingId = responseBefore.body._id;
+    const existingId = await getExistingId();
+    const responseBeforeUpdate = await client.get(`/products/${existingId}`);
 
-    const responseAfter = await client
+    const response = await client
       .put(`/products/${existingId}`)
-      .send(validResForUpdate)
+      .send({ name: "different name" })
       .expect(200);
+    expect(responseBeforeUpdate.body.name).not.toEqual(response.body.name);
+    expect(typeof response.body.name).toBe("string");
   });
 
   it("should test that PUT /products/:productId with a non-existing id returns 404", async () => {
     await client.put(`/producsts/${notExistingId}`).expect(404);
   });
-
-  // it("should test that PUT /products/:productId with a response with same name value returns error")
 });
